@@ -203,6 +203,10 @@ while denying unrelated S3 writes, IAM administration, and distribution creation
 without the project tag. Simulation is a configuration check, not proof that
 every deployment API call will succeed.
 
+The [Ubuntu CI run](https://github.com/charliemags/infra-eng-challenge/actions/runs/45525838751)
+passed formatting, locked provider initialization, and schema validation after
+the Linux checksum fix. Live website checks remain pending deployment.
+
 ## Continuous validation
 
 [Terraform validation](https://github.com/charliemags/infra-eng-challenge/actions/workflows/terraform.yml)
