@@ -1,0 +1,4 @@
+# Replace this with the account returned by: aws sts get-caller-identity
+aws_account_id = "123456789012"
+aws_region     = "us-east-1"
+site_owner     = "Charlie Magnarelli"

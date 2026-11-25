@@ -1,0 +1,128 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:AbortMultipartUpload",
+        "s3:DeleteObject",
+        "s3:DeleteObjectTagging",
+        "s3:GetObject",
+        "s3:GetObjectTagging",
+        "s3:PutObject",
+        "s3:PutObjectTagging"
+      ],
+      "Resource": [
+        "arn:aws:s3:::infra-eng-challenge-*/index.html"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket",
+        "s3:DeleteBucketPolicy",
+        "s3:GetAccelerateConfiguration",
+        "s3:GetBucketAcl",
+        "s3:GetBucketCORS",
+        "s3:GetBucketLogging",
+        "s3:GetBucketObjectLockConfiguration",
+        "s3:GetBucketOwnershipControls",
+        "s3:GetBucketPolicy",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:GetBucketRequestPayment",
+        "s3:GetBucketTagging",
+        "s3:GetBucketVersioning",
+        "s3:GetBucketWebsite",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:GetReplicationConfiguration",
+        "s3:ListBucket",
+        "s3:PutBucketOwnershipControls",
+        "s3:PutBucketPolicy",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:PutBucketTagging",
+        "s3:PutEncryptionConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:s3:::infra-eng-challenge-*"
+      ]
+    },
+    {
+      "Sid": "CreateUntaggedCloudFrontConfiguration",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:CreateCachePolicy",
+        "cloudfront:CreateOriginAccessControl",
+        "cloudfront:CreateResponseHeadersPolicy"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CreateProjectDistribution",
+      "Effect": "Allow",
+      "Action": "cloudfront:CreateDistribution",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/Project": "infra-eng-challenge"
+        }
+      }
+    },
+    {
+      "Sid": "TagNewProjectDistribution",
+      "Effect": "Allow",
+      "Action": "cloudfront:TagResource",
+      "Resource": "arn:aws:cloudfront::123456789012:distribution/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/Project": "infra-eng-challenge"
+        }
+      }
+    },
+    {
+      "Sid": "ManageProjectDistribution",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetDistribution",
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:ListTagsForResource",
+        "cloudfront:UpdateDistribution",
+        "cloudfront:DeleteDistribution"
+      ],
+      "Resource": "arn:aws:cloudfront::123456789012:distribution/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/Project": "infra-eng-challenge"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetCachePolicy",
+        "cloudfront:UpdateCachePolicy",
+        "cloudfront:DeleteCachePolicy"
+      ],
+      "Resource": "arn:aws:cloudfront::123456789012:cache-policy/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetOriginAccessControl",
+        "cloudfront:UpdateOriginAccessControl",
+        "cloudfront:DeleteOriginAccessControl"
+      ],
+      "Resource": "arn:aws:cloudfront::123456789012:origin-access-control/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetResponseHeadersPolicy",
+        "cloudfront:UpdateResponseHeadersPolicy",
+        "cloudfront:DeleteResponseHeadersPolicy"
+      ],
+      "Resource": "arn:aws:cloudfront::123456789012:response-headers-policy/*"
+    }
+  ]
+}

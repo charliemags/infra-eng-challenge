@@ -1,0 +1,20 @@
+# Terraform's provider cache, local inputs, state, and saved plans.
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+tfplan
+*.tfplan
+crash.log
+crash.*.log
+.terraformrc
+terraform.rc
+
+# Local environment and credentials.
+.env
+.env.*
+.aws/
+.DS_Store
+
+# Commit .terraform.lock.hcl and *.tfvars.example.
