@@ -14,6 +14,7 @@ infrastructure and page, with no servers to maintain.
 
 You need Terraform 1.10 or later (v1.x), AWS CLI 2.32+, Git, curl, and a non-root AWS profile
 with S3 and CloudFront management permissions. Use temporary credentials.
+Console-based `aws login` also requires the `SignInLocalDevelopmentAccess` policy.
 The [policy example](infra/deployment-policy.example.json) contains a placeholder
 account ID; review its CloudFront creation wildcards and narrow management access
 to the created resources after deployment.
