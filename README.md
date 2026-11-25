@@ -3,9 +3,12 @@
 A small static website on AWS, provisioned with Terraform. The page displays
 "This is Charlie Magnarelli's website."
 
-**Status:** Terraform validation and an authenticated AWS plan have passed.
-Deployment, live checks, and author review remain outstanding. This repository
-records completed checks separately from proposed production improvements.
+**Live website:** https://d2bgkazvb3wnbb.cloudfront.net
+
+**Status:** deployed and verified. Terraform reports no changes, and the public
+page, HTTPS redirect, security headers, and private origin checks passed.
+Author review remains outstanding before submission. This repository records
+completed checks separately from proposed production improvements.
 
 ## Approach
 
@@ -49,13 +52,14 @@ approximately 30-60 minutes of personal effort so far. That is an interim
 self-report, not a measured final total. Deployment and the required explanations
 take priority over additional features.
 
-The engineering approach emphasizes three qualities:
+The engineering approach demonstrates the three programming virtues through
+specific behavior:
 
-| Quality | Concrete evidence |
+| Virtue | Concrete evidence |
 | --- | --- |
-| Reduce repeated effort | Terraform provisions content and infrastructure; deployment and cleanup commands are documented |
-| Anticipate problems and give fast feedback | Expected-account checks, input validation, short cache lifetimes, CI validation, and troubleshooting guidance |
-| Take pride in maintainable work | Small configuration, readable policies, reproducible dependency versions, and accurate verification results |
+| Laziness: reduce repeated effort | Terraform provisions content and infrastructure; deployment and cleanup commands are documented |
+| Impatience: anticipate problems and give fast feedback | Expected-account checks, input validation, short cache lifetimes, CI validation, and troubleshooting guidance |
+| Hubris: take pride in maintainable work | Small configuration, readable policies, reproducible dependency versions, and accurate verification results |
 
 ## Repository layout
 
@@ -91,8 +95,8 @@ This project uses the standard commercial AWS partition and defaults to
 
 Create or obtain your deployment identity separately from this Terraform root.
 A dedicated console-only IAM deployment user has been created in the author's
-account and the reviewed deployment policy has been attached. Password/MFA
-setup and named-profile login remain outstanding. Browser sign-in provides
+account and the reviewed deployment policy has been attached. Console access,
+passkey MFA, and the named CLI profile have been verified. Browser sign-in provides
 temporary credentials without access keys.
 Another reader can use their existing suitably authorized identity. The website
 stack does not create or delete its operator's access.
@@ -104,7 +108,10 @@ before use. S3 access is limited to project-prefixed buckets and `index.html`;
 distribution access requires the project tag. CloudFront's three configuration
 create actions require wildcard resources, and configuration management is
 initially scoped to the target account. Narrow it to the created configuration
-IDs after deployment. IAM administration is excluded; the separate
+IDs after deployment. The deployed account's policy has been narrowed to the
+exact distribution, cache policy, headers policy, and OAC; the committed example
+retains bootstrap scope so another reader can create their own deployment.
+IAM administration is excluded; the separate
 `SignInLocalDevelopmentAccess` managed policy permits browser-based CLI login.
 
 ## Deploy
@@ -119,7 +126,9 @@ IDs after deployment. IAM administration is excluded; the separate
    aws sts get-caller-identity
    ```
 
-   Complete your normal AWS login first if this command fails. Check the
+   Complete your normal AWS login first if this command fails. For console-based
+   access, use `aws login --profile your-profile` and select your non-root identity
+   in the browser. Check the
    account ID and role in the result; do not paste credentials into this repo.
 
 2. Copy and edit the inputs:
@@ -184,16 +193,28 @@ Expected results:
   exit 1 indicates an error.
 
 `validate` checks configuration and provider schema; it does not prove AWS
-permissions, service acceptance, or live behavior. Record the actual deployment
-URL, tool versions, date, and results here after performing these checks. Do not
-commit state or raw plan files as evidence.
+permissions, service acceptance, or live behavior. The verification record below
+distinguishes those checks. Keep state and raw plan files out of source control.
 
-Local verification on November 24, 2026 used Terraform 1.17.2 and the signed AWS
-provider 6.74.0. Formatting and schema validation passed. Evaluating the real
-Terraform template confirmed the supplied name and HTML escaping. Git ignore
-rules were checked for inputs, plans, state, and downloaded providers. An
-authenticated AWS plan completed successfully: 10 resources to add, 0 to change,
-and 0 to destroy. No apply, live HTTP checks, or destroy has been performed yet.
+Verification on November 24, 2026 used Terraform 1.17.2 and the signed AWS provider
+6.74.0. Deployment used the dedicated non-root profile with temporary credentials.
+
+| Check | Observed result |
+| --- | --- |
+| Terraform formatting and schema validation | Passed |
+| HTML template and escaping | Supplied name rendered correctly; HTML-sensitive input escaped |
+| Initial plan and apply | Ten resources created; no existing resources changed or destroyed |
+| Public HTTPS page | HTTP 200 with Charlie Magnarelli's name; also opened successfully in Firefox |
+| HTTP endpoint | HTTP 301 with the HTTPS URL in `Location` |
+| Browser security headers | CSP, HSTS, X-Frame-Options, and X-Content-Type-Options present |
+| Anonymous direct S3 object request | HTTP 403 |
+| Plan after narrowing deployment permissions | No changes; detailed exit code 0 |
+| Cleanup plan | Reviewed: zero additions, zero changes, ten deletions; not applied |
+| Git exclusions | Local inputs, state, plans, and provider downloads excluded |
+
+The website remains live for review. Actual destruction and a complete rebuild
+have not been exercised. Saved plan artifacts were removed after review; local
+state is retained privately with owner-only permissions.
 
 A clean checkout of the committed source also passed formatting, locked provider
 initialization, schema validation, and an authenticated plan with the same ten
@@ -205,7 +226,7 @@ every deployment API call will succeed.
 
 The [Ubuntu CI run](https://github.com/charliemags/infra-eng-challenge/actions/runs/45525838751)
 passed formatting, locked provider initialization, and schema validation after
-the Linux checksum fix. Live website checks remain pending deployment.
+the Linux checksum fix. CI is separate from the live checks recorded above.
 
 ## Continuous validation
 
@@ -246,7 +267,8 @@ charges. Traffic, region, and account-specific credits affect the bill; free
 tier eligibility is not assumed. Check current
 [S3 pricing](https://aws.amazon.com/s3/pricing/) and
 [CloudFront pricing](https://aws.amazon.com/cloudfront/pricing/) for your account.
-Set an account budget alert before publishing; alerts do not cap spending.
+For ongoing hosting, configure an account budget alert; alerts do not cap
+spending. This exercise does not provision a budget or enforce a spending limit.
 
 To remove only this deployment:
 
@@ -260,6 +282,10 @@ so cleanup can also take several minutes. The bucket refuses forced deletion:
 if you manually added other objects, remove those deliberately before retrying.
 Keep the state until cleanup succeeds. Keep the site available for review if
 requested, and agree on its eventual removal.
+
+The separately bootstrapped IAM user and deployment policy are outside this
+Terraform root. Remove them separately through an authorized account administrator
+when they are no longer needed; website cleanup does not revoke operator access.
 
 ## Troubleshooting
 
@@ -328,21 +354,26 @@ Codex was asked to help interpret the requirements and job context, recommend a
 basic AWS and Terraform approach, and prepare a reproducible local starter.
 It reviewed AWS and Terraform documentation, drafted the implementation and this
 README, ran the local checks recorded above, and generated an authenticated AWS
-plan. The requested goal was a small static
+plan. It implemented the validation workflow, deployed using the dedicated
+non-root profile after the author completed password and passkey setup, and ran
+the live checks and reviewed cleanup plan recorded above. The requested goal was a small static
 site with clear deployment, cleanup, alternatives, and a production evolution
 discussion. The author's name was clarified as Charlie Magnarelli.
 
 Human direction clarified the name, selected the small validation workflow, and
 repeatedly asked to keep the work focused on simple requirements and instructions.
 That feedback kept the implementation to a static website and excluded a separate
-interview document. The author's assessment was that AI was useful for
-brainstorming, while the engineer remained responsible for deciding direction.
+interview document. The author's feedback, in his own words:
+
+> it was a great brainstormer but ultimately up to the engineer (me) to make decisions on direction.
+
 Additional limitations surfaced during implementation: the policy generator
 included unrelated permissions, so its output needed review and narrowing before
 attachment, and the first Linux CI run exposed a provider checksum mismatch that
-the local checks did not catch. The factual assistance history does not imply that the author has
-completed a personal code review or live verification; those steps remain
-outstanding before submission.
+the local checks did not catch. The factual assistance history does not imply
+that the author has completed a personal code review. That review remains
+outstanding before submission; live checks performed by Codex are identified
+in the verification record.
 
 ## References
 
