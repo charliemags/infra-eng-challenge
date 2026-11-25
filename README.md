@@ -195,13 +195,22 @@ rules were checked for inputs, plans, state, and downloaded providers. An
 authenticated AWS plan completed successfully: 10 resources to add, 0 to change,
 and 0 to destroy. No apply, live HTTP checks, or destroy has been performed yet.
 
+A clean checkout of the committed source also passed formatting, locked provider
+initialization, schema validation, and an authenticated plan with the same ten
+additions. It received its own local inputs and was not applied, so it created
+no duplicate infrastructure. IAM policy simulation allowed the project page
+while denying unrelated S3 writes, IAM administration, and distribution creation
+without the project tag. Simulation is a configuration check, not proof that
+every deployment API call will succeed.
+
 ## Continuous validation
 
 [Terraform validation](https://github.com/charliemags/infra-eng-challenge/actions/workflows/terraform.yml)
 runs on pull requests, pushes to `main`, and manual dispatch. It checks formatting,
 initializes the locked provider without a backend, and validates configuration.
 The Ubuntu runner uses Terraform 1.17.2; both setup actions are pinned to release
-commit hashes. The workflow has only repository-content read permission and no
+commit hashes, and the lock file includes explicit macOS ARM64 and Linux AMD64
+provider checksums. The workflow has only repository-content read permission and no
 AWS credentials. It does not prove deployment permissions or live behavior.
 
 Deployment remains a manual operation using a reviewed saved plan. The public
@@ -324,9 +333,10 @@ repeatedly asked to keep the work focused on simple requirements and instruction
 That feedback kept the implementation to a static website and excluded a separate
 interview document. The author's assessment was that AI was useful for
 brainstorming, while the engineer remained responsible for deciding direction.
-An additional limitation surfaced during implementation: the policy generator
+Additional limitations surfaced during implementation: the policy generator
 included unrelated permissions, so its output needed review and narrowing before
-attachment. The factual assistance history does not imply that the author has
+attachment, and the first Linux CI run exposed a provider checksum mismatch that
+the local checks did not catch. The factual assistance history does not imply that the author has
 completed a personal code review or live verification; those steps remain
 outstanding before submission.
 
